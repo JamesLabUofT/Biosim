@@ -4,14 +4,6 @@ format: html
 editor: visual
 ---
 
-## Quarto
-
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
 ```{r}
 locations <- read.csv("SpongyMoth_updated_Summer2023.csv")
 locations
@@ -25,15 +17,17 @@ today = Sys.Date()
 year <- as.numeric(format(today, "%Y"))
 #BioSIM::biosimclient.config(forceClimateGenerationEnabled = TRUE)
 
-output <- generateWeather("Gypsy_Moth_Seasonality", year-1, year, locations$KeyID, locations$Latitude, locations$Longitude, normals);
+output <- BioSIM::generateWeather("Gypsy_Moth_Seasonality", year-1, year, locations$KeyID, locations$Latitude, locations$Longitude);
 
 
 
 #Clsoe Java client
-shutdownClient()
+BioSIM::shutdownClient()
 
 ```
+
 ```{r}
+#| echo: false
 today = "7-6-23"
 year = 2023
 # range of confidence intervals
@@ -206,7 +200,7 @@ gm <- as.data.frame(output$Gypsy_Moth_Seasonality)
   #write.csv(tablefinal,paste("SpongyMoth_",lifestage,"_BioSIM_Summer_",year,"_Sampling_dates_",today,".csv",sep=""))
 }
 ```
-The `echo: false` option disables the printing of code (only output is displayed).
+
 ```{r}
 library(DT)
 final_dt <- DT::datatable(data = tablefinal,
@@ -234,5 +228,3 @@ final_dt <- DT::datatable(data = tablefinal,
 final_dt
 
 ```
-
-
