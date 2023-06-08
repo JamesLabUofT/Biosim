@@ -1,7 +1,5 @@
 project:
-  type: website
-execute:
-  freeze: auto
+  type: website 
 website:
   title: "BiosimWebsite"
   navbar:
