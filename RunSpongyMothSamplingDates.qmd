@@ -10,7 +10,7 @@ editor: visual
 #| output: asis
 today = Sys.Date()
 year <- as.numeric(format(today, "%Y"))
-print(paste0("#Sampling dates generated ", today, "\n"))
+cat(paste0("#Sampling dates generated ", today, "\n"))
 ```
 
 ```{r}
@@ -217,6 +217,7 @@ gm <- as.data.frame(output$Gypsy_Moth_Seasonality)
 ```
 
 ```{r}
+#| echo: false
 library(DT)
 final_dt <- DT::datatable(data = tablefinal,
                           colnames = c("resource", "site", "min66",
