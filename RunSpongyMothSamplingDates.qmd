@@ -6,6 +6,16 @@ editor: visual
 ---
 
 ```{r}
+#| echo: false
+#| output: asis
+today = Sys.Date()
+year <- as.numeric(format(today, "%Y"))
+print(paste0("#Sampling dates generated ", today, "\n"))
+```
+
+```{r}
+#| echo: false
+#| output:false
 install.packages("https://sourceforge.net/projects/repiceasource/files/latest/download", repos = NULL,  type="source")
 
 install.packages("https://sourceforge.net/projects/biosimclient.mrnfforesttools.p/files/latest/download", repos = NULL,  type="source")
@@ -13,11 +23,10 @@ install.packages("https://sourceforge.net/projects/biosimclient.mrnfforesttools.
 
 
 ```{r}
+#| echo: false
 locations <- read.csv("SpongyMoth_updated_Summer2023.csv")
-locations
 ```
 
-You can add options to executable code like this
 
 ```{r}
 #| echo: false
@@ -36,8 +45,6 @@ BioSIM::shutdownClient()
 
 ```{r}
 #| echo: false
-today = "7-6-23"
-year = 2023
 # range of confidence intervals
 CI = c(66,95,99)
 
