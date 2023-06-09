@@ -3,14 +3,15 @@ title: "SpongyMoth"
 format: html
 editor: visual
 ---
----
+
+------------------------------------------------------------------------
 
 ```{r}
 #| echo: false
 #| output: asis
 today = Sys.Date()
 year <- as.numeric(format(today, "%Y"))
-cat(paste0("#Sampling dates generated ", today, "\n"))
+cat(paste0("# Sampling dates generated ", today, "\n"))
 ```
 
 ```{r}
@@ -21,15 +22,14 @@ install.packages("https://sourceforge.net/projects/repiceasource/files/latest/do
 install.packages("https://sourceforge.net/projects/biosimclient.mrnfforesttools.p/files/latest/download", repos = NULL,  type="source")
 ```
 
-
 ```{r}
 #| echo: false
 locations <- read.csv("SpongyMoth_updated_Summer2023.csv")
 ```
 
-
 ```{r}
 #| echo: false
+#| output: false
 today = Sys.Date()
 year <- as.numeric(format(today, "%Y"))
 #BioSIM::biosimclient.config(forceClimateGenerationEnabled = TRUE)
