@@ -9,16 +9,6 @@
     ]
   },
   "Packages": {
-    "BioSIM": {
-      "Package": "BioSIM",
-      "Version": "1.0.2",
-      "Source": "unknown",
-      "Requirements": [
-        "J4R",
-        "R"
-      ],
-      "Hash": "e9c07743ec67fd8141804467a920bc93"
-    },
     "Cairo": {
       "Package": "Cairo",
       "Version": "1.6-0",
@@ -46,16 +36,6 @@
         "promises"
       ],
       "Hash": "ab745834dfae7eaf71dd0b90f3b66759"
-    },
-    "J4R": {
-      "Package": "J4R",
-      "Version": "1.2.1",
-      "Source": "unknown",
-      "Requirements": [
-        "methods",
-        "utils"
-      ],
-      "Hash": "52af435f26c0d708e4b21a933936b26c"
     },
     "R6": {
       "Package": "R6",

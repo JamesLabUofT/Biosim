@@ -3,6 +3,14 @@ title: "SpongyMoth"
 format: html
 editor: visual
 ---
+---
+
+```{r}
+install.packages("https://sourceforge.net/projects/repiceasource/files/latest/download", repos = NULL,  type="source")
+
+install.packages("https://sourceforge.net/projects/biosimclient.mrnfforesttools.p/files/latest/download", repos = NULL,  type="source")
+```
+
 
 ```{r}
 locations <- read.csv("SpongyMoth_updated_Summer2023.csv")
