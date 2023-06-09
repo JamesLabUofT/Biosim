@@ -15,7 +15,7 @@ print(paste0("#Sampling dates generated ", today, "\n"))
 
 ```{r}
 #| echo: false
-#| output:false
+#| output: false
 install.packages("https://sourceforge.net/projects/repiceasource/files/latest/download", repos = NULL,  type="source")
 
 install.packages("https://sourceforge.net/projects/biosimclient.mrnfforesttools.p/files/latest/download", repos = NULL,  type="source")
