@@ -32,7 +32,7 @@ locations <- read.csv("SpongyMoth_updated_Summer2023.csv")
 #| output: false
 today = Sys.Date()
 year <- as.numeric(format(today, "%Y"))
-#BioSIM::biosimclient.config(forceClimateGenerationEnabled = TRUE)
+BioSIM::biosimclient.config(forceClimateGenerationEnabled = TRUE)
 
 output <- BioSIM::generateWeather("Gypsy_Moth_Seasonality", year-1, year, locations$KeyID, locations$Latitude, locations$Longitude);
 
@@ -42,9 +42,61 @@ output <- BioSIM::generateWeather("Gypsy_Moth_Seasonality", year-1, year, locati
 BioSIM::shutdownClient()
 
 ```
+```{r}
+#| echo: false
+#| eval: false
+library(ggplot2)
+library(ggridges)
+library(plotly)
 
+output$Gypsy_Moth_Seasonality$Date <- paste0( output$Gypsy_Moth_Seasonality$Year,"-", output$Gypsy_Moth_Seasonality$Month,"-", output$Gypsy_Moth_Seasonality$Day)
 
+minDateIndex <- min(unlist(lapply(unique(output$Gypsy_Moth_Seasonality$KeyID), function(id){which(subset(output$Gypsy_Moth_Seasonality, KeyID == id)$Pupae != 0)[1]})))
 
+maxDateIndex <- max(unlist(lapply(unique(output$Gypsy_Moth_Seasonality$KeyID), function(id){which(subset(output$Gypsy_Moth_Seasonality, KeyID == id)$Pupae != 0)[-1]})))
+
+minDate <- as.Date(output$Gypsy_Moth_Seasonality$Date[minDateIndex])
+maxDate <- as.Date(output$Gypsy_Moth_Seasonality$Date[maxDateIndex])
+
+#ggplotly(ggplot(output$Gypsy_Moth_Seasonality, aes(x= as.Date(Date), y = as.factor(KeyID), height = Pupae, group = as.factor(KeyID))) + geom_density_ridges2(stat="identity")  + xlim(minDate, maxDate))
+ggplotly(ggplot(output$Gypsy_Moth_Seasonality, aes(x= as.Date(Date), y = after_stat(output$Gypsy_Moth_Seasonality$Pupae), fill = as.factor(KeyID))) + geom_density(position = "fill")  + xlim(minDate, maxDate))
+  #geom_point()
+```
+
+```{r}
+#| echo: false
+#| eval: false
+df <- output$Gypsy_Moth_Seasonality
+
+fig <- plot_ly(type = 'violin')
+for (i in 1:length(unique(df$KeyID))) {
+  fig <- add_trace(
+    fig,
+    x=df$Date[df$KeyID == i],
+    y=df$Pupae[df$KeyID == i],
+    hoveron = "points+Pupae",
+    side = 'negative',
+    scalemode = 'count',
+    color = I("blue")
+    
+  ) 
+}
+fig
+```
+
+```{r}
+#| echo: false
+#| eval: false
+df <- subset(output$Gypsy_Moth_Seasonality, KeyID == 1)
+
+df %>% plot_ly(
+    y = ~KeyID,
+    x = ~Pupae,
+    orientation = "h",
+    side = "positive",
+    type = 'violin')
+
+```
 
 ```{r}
 #| echo: false
@@ -205,12 +257,16 @@ getDatesForLifestage <- function(lifestage){
     final[[i]] <- cbind(matrix66,matrix95,matrix99)
   }
   
-  tablefinal <- data.frame(Reduce(rbind, final))
-  tablefinal <- tablefinal[,c("resource","site","min66","max66","min95","max95","min99","max99")]
   
+  
+  
+  tablefinal <- data.frame(Reduce(rbind, final))
+  tablefinal$name <- locations$Name
   tablefinal$latitude <- locations$Latitude
   tablefinal$longitude <- locations$Longitude
-  tablefinal$name <- locations$Name
+  tablefinal <- tablefinal[,c("site", "name", "latitude", "longitude", "min66","max66","min95","max95","min99","max99")]
+  
+  
   
   # save file
   #write.csv(tablefinal,paste("SpongyMoth_",lifestage,"_BioSIM_Summer_",year,"_Sampling_dates_",today,".csv",sep=""))
@@ -224,15 +280,14 @@ getDatesForLifestage <- function(lifestage){
 #| echo: false
 library(DT)
 pupae_dt <- DT::datatable(data = getDatesForLifestage("Pupae"),
-                          colnames = c("resource", "site", "min66",
-                                       "max66", "min95", "max95",
-                                       "min99", "max99", "latitude",
-                                       "longitude", "name"),
+                          rownames = FALSE,
+                          colnames = c("site", "name","latitude","longitude","start66",
+                                       "end66", "start95", "end95",
+                                       "start99", "end99"),
                           filter = "top",
                           extensions = c("Buttons", "ColReorder"),
                            options = list(
-                       # list 10 entries at once
-                       pageLength = 10, 
+                       pageLength = nrow(locations), 
                        # automatically size columns
                        autoWidth = TRUE,
                        # highlight entries that match search term
@@ -255,15 +310,14 @@ pupae_dt
 #| echo: false
 library(DT)
 adult_dt <- DT::datatable(data = getDatesForLifestage("Adult"),
-                          colnames = c("resource", "site", "min66",
-                                       "max66", "min95", "max95",
-                                       "min99", "max99", "latitude",
-                                       "longitude", "name"),
+                          rownames = FALSE,
+                          colnames = c("site", "name","latitude","longitude","start66",
+                                       "end66", "start95", "end95",
+                                       "start99", "end99"),
                           filter = "top",
                           extensions = c("Buttons", "ColReorder"),
                            options = list(
-                       # list 10 entries at once
-                       pageLength = 10, 
+                       pageLength = nrow(locations), 
                        # automatically size columns
                        autoWidth = TRUE,
                        # highlight entries that match search term
