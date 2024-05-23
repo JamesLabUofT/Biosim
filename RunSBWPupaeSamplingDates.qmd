@@ -1,0 +1,231 @@
+---
+title: "SBW"
+format: html
+editor: visual
+---
+
+------------------------------------------------------------------------
+
+```{r}
+#| echo: false
+#| output: asis
+today = Sys.Date()
+year <- as.numeric(format(today, "%Y"))
+cat(paste0("# Sampling dates generated ", today, "\n"))
+```
+
+```{r}
+#| echo: false
+#| output: false
+install.packages("https://sourceforge.net/projects/repiceasource/files/latest/download", repos = NULL,  type="source")
+
+install.packages("https://sourceforge.net/projects/biosimclient.mrnfforesttools.p/files/latest/download", repos = NULL,  type="source")
+```
+
+```{r}
+#| echo: false
+locations <- read.csv("SBW_sites.csv")
+```
+
+```{r}
+#| echo: false
+#| output: false
+today = Sys.Date()
+year <- as.numeric(format(today, "%Y"))
+#BioSIM::biosimclient.config(forceClimateGenerationEnabled = TRUE)
+
+output <- BioSIM::generateWeather("Spruce_Budworm_Biology", year, year, locations$KeyID, locations$Latitude, locations$Longitude);
+
+
+
+#Clsoe Java client
+BioSIM::shutdownClient()
+
+```
+
+```{r}
+#| echo: false
+#| eval: false
+library(ggplot2)
+library(ggridges)
+library(plotly)
+
+output$Spruce_Budworm_Biology$Date <- paste0( output$Spruce_Budworm_Biology$Year,"-", output$Spruce_Budworm_Biology$Month,"-", output$Spruce_Budworm_Biology$Day)
+
+minDateIndex <- min(unlist(lapply(unique(output$Spruce_Budworm_Biology$KeyID), function(id){which(subset(output$Spruce_Budworm_Biology, KeyID == id)$Pupae != 0)[1]})))
+
+maxDateIndex <- max(unlist(lapply(unique(output$Spruce_Budworm_Biology$KeyID), function(id){which(subset(output$Spruce_Budworm_Biology, KeyID == id)$Pupae != 0)[-1]})))
+
+minDate <- as.Date(output$Spruce_Budworm_Biology$Date[minDateIndex])
+maxDate <- as.Date(output$Spruce_Budworm_Biology$Date[maxDateIndex])
+
+#ggplotly(ggplot(output$Gypsy_Moth_Seasonality, aes(x= as.Date(Date), y = as.factor(KeyID), height = Pupae, group = as.factor(KeyID))) + geom_density_ridges2(stat="identity")  + xlim(minDate, maxDate))
+ggplotly(ggplot(output$Spruce_Budworm_Biology, aes(x= as.Date(Date), y = after_stat(output$Spruce_Budworm_Biology$Pupae), fill = as.factor(KeyID))) + geom_density(position = "fill")  + xlim(minDate, maxDate))
+  #geom_point()
+```
+
+```{r}
+#| echo: false
+#| eval: false
+df <- output$Spruce_Budworm_Biology
+
+fig <- plot_ly(type = 'violin')
+for (i in 1:length(unique(df$KeyID))) {
+  fig <- add_trace(
+    fig,
+    x=df$Date[df$KeyID == i],
+    y=df$Pupae[df$KeyID == i],
+    hoveron = "points+Pupae",
+    side = 'negative',
+    scalemode = 'count',
+    color = I("blue")
+    
+  ) 
+}
+fig
+```
+
+```{r}
+#| echo: false
+#| eval: false
+df <- subset(output$Spruce_Budworm_Biology, KeyID == 1)
+
+df %>% plot_ly(
+    y = ~KeyID,
+    x = ~Pupae,
+    orientation = "h",
+    side = "positive",
+    type = 'violin')
+
+```
+
+```{r}
+#| echo: false
+# range of confidence intervals
+# Load BioSIM data
+# Make sure data is in multiple columns
+# Make sure names matches
+gm <- as.data.frame(output$Spruce_Budworm_Biology)
+
+# Date when loop was run
+#today = "7-6-22"
+
+getDatesForLifestage <- function(lifestage){
+  
+  resource = gm
+  resource$Name <- resource$KeyID
+  
+  sites <- unique(resource$Name)
+  tableFinal <- data.frame(min66 = character(), max66 = character(),
+                           min95 = character(), max95 = character(),
+                           min99 = character(), max99 = character())
+  for (m in 1:length(sites)){
+    site <- subset(resource, KeyID == sites[m])  
+    site$date <-paste(site$Year,"-", site$Month,"-", site$Day, sep ="") 
+    
+    if (lifestage == "Pupae"){
+      modelOutput <- site$Pupae
+    } else {
+      if (lifestage == "Adults"){
+        modelOutput <- site$Adults
+      } else {
+        modelOutput <- NULL
+      }
+    }
+    
+    min66 <- sum(modelOutput)*(((100-66)/2)/100)
+    max66 <- sum(modelOutput)*((66+((100-66)/2))/100) 
+    
+    min95 <- sum(modelOutput)*(((100-95)/2)/100)
+    max95 <- sum(modelOutput)*((95+((100-95)/2))/100) 
+    
+    min99 <- sum(modelOutput)*(((100-99)/2)/100)
+    max99 <- sum(modelOutput)*((99+((100-99)/2))/100) 
+    
+    site$sum <- cumsum(modelOutput)
+    startDate66 <- site[site$sum>=min66,][1,]$date
+    endDate66 <- tail(site[site$sum<=max66,], 1)$date
+    
+    startDate95 <- site[site$sum>=min95,][1,]$date
+    endDate95 <- tail(site[site$sum<=max95,], 1)$date
+    
+    startDate99 <- site[site$sum>=min99,][1,]$date
+    endDate99 <- tail(site[site$sum<=max99,], 1)$date
+    
+    siteFinal <- data.frame(min66 = startDate66, max66 = endDate66,
+                           min95 = startDate95, max95 = endDate95,
+                           min99 = startDate99, max99 = endDate99)
+    tableFinal <- rbind(tableFinal, siteFinal)
+  }
+  tableFinal$site <- locations$KeyID
+  tableFinal$name <- locations$Name
+  tableFinal$latitude <- locations$Latitude
+  tableFinal$longitude <- locations$Longitude
+  tableFinal <- tableFinal[,c("site", "name", "latitude", "longitude", "min66","max66","min95","max95","min99","max99")]
+  
+  # save file
+  #write.csv(tablefinal,paste("SpongyMoth_",lifestage,"_BioSIM_Summer_",year,"_Sampling_dates_",today,".csv",sep=""))
+  return(tableFinal)
+}
+```
+
+## Pupae SBW
+
+```{r}
+#| echo: false
+library(DT)
+pupae_dt <- DT::datatable(data = getDatesForLifestage("Pupae"),
+                          rownames = FALSE,
+                          colnames = c("site", "name","latitude","longitude","start66",
+                                       "end66", "start95", "end95",
+                                       "start99", "end99"),
+                          filter = "top",
+                          extensions = c("Buttons", "ColReorder"),
+                           options = list(
+                       pageLength = nrow(locations), 
+                       # automatically size columns
+                       autoWidth = TRUE,
+                       # highlight entries that match search term
+                       searchHighlight = TRUE,
+                       # allow regular expressions and case insensitive searches
+                       search = list(regex = TRUE, caseInsensitive = TRUE),
+                       dom = "Bfrtip",
+                       # buttons options
+                       buttons = c("copy", "csv", "excel", "pdf", "print", "colvis"),
+                       # links to extension call
+                       colReorder = TRUE)
+)
+pupae_dt
+
+```
+
+## Adult SBW
+
+```{r}
+#| echo: false
+library(DT)
+adult_dt <- DT::datatable(data = getDatesForLifestage("Adults"),
+                          rownames = FALSE,
+                          colnames = c("site", "name","latitude","longitude","start66",
+                                       "end66", "start95", "end95",
+                                       "start99", "end99"),
+                          filter = "top",
+                          extensions = c("Buttons", "ColReorder"),
+                           options = list(
+                       pageLength = nrow(locations), 
+                       # automatically size columns
+                       autoWidth = TRUE,
+                       # highlight entries that match search term
+                       searchHighlight = TRUE,
+                       # allow regular expressions and case insensitive searches
+                       search = list(regex = TRUE, caseInsensitive = TRUE),
+                       dom = "Bfrtip",
+                       # buttons options
+                       buttons = c("copy", "csv", "excel", "pdf", "print", "colvis"),
+                       # links to extension call
+                       colReorder = TRUE)
+)
+adult_dt
+
+```
+
