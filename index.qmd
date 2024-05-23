@@ -1,0 +1,11 @@
+---
+title: "James Lab @ UofT's Biosim simulations"
+---
+
+# Biosim simulations for the purposes of insect sampling
+
+## Projects:
+
+|                                                     |                                                    |
+|-----------------------------------------------------|----------------------------------------------------|
+| [**Spruce Budworm**](RunSBWPupaeSamplingDates.html) | [**Spongy Moth**](RunSpongyMothSamplingDates.html) |

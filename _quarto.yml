@@ -4,6 +4,8 @@ website:
   title: "BiosimWebsite"
   navbar:
     left:
+      - href: index.qmd
+        text: Home
       - href: RunSBWPupaeSamplingDates.qmd
         text: SBW 
       - href: RunSpongyMothSamplingDates.qmd
