@@ -32,7 +32,7 @@ locations <- read.csv("SpongyMoth_updated_Summer2023.csv")
 #| output: false
 today = Sys.Date()
 year <- as.numeric(format(today, "%Y"))
-BioSIM::biosimclient.config(forceClimateGenerationEnabled = TRUE)
+#BioSIM::biosimclient.config(forceClimateGenerationEnabled = TRUE)
 
 output <- BioSIM::generateWeather("Gypsy_Moth_Seasonality", year-1, year, locations$KeyID, locations$Latitude, locations$Longitude);
 
