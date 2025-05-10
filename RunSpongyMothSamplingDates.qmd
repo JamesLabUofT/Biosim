@@ -42,61 +42,6 @@ output <- BioSIM::generateWeather("Gypsy_Moth_Seasonality", year-1, year, locati
 BioSIM::shutdownClient()
 
 ```
-```{r}
-#| echo: false
-#| eval: false
-library(ggplot2)
-library(ggridges)
-library(plotly)
-
-output$Gypsy_Moth_Seasonality$Date <- paste0( output$Gypsy_Moth_Seasonality$Year,"-", output$Gypsy_Moth_Seasonality$Month,"-", output$Gypsy_Moth_Seasonality$Day)
-
-minDateIndex <- min(unlist(lapply(unique(output$Gypsy_Moth_Seasonality$KeyID), function(id){which(subset(output$Gypsy_Moth_Seasonality, KeyID == id)$Pupae != 0)[1]})))
-
-maxDateIndex <- max(unlist(lapply(unique(output$Gypsy_Moth_Seasonality$KeyID), function(id){which(subset(output$Gypsy_Moth_Seasonality, KeyID == id)$Pupae != 0)[-1]})))
-
-minDate <- as.Date(output$Gypsy_Moth_Seasonality$Date[minDateIndex])
-maxDate <- as.Date(output$Gypsy_Moth_Seasonality$Date[maxDateIndex])
-
-#ggplotly(ggplot(output$Gypsy_Moth_Seasonality, aes(x= as.Date(Date), y = as.factor(KeyID), height = Pupae, group = as.factor(KeyID))) + geom_density_ridges2(stat="identity")  + xlim(minDate, maxDate))
-ggplotly(ggplot(output$Gypsy_Moth_Seasonality, aes(x= as.Date(Date), y = after_stat(output$Gypsy_Moth_Seasonality$Pupae), fill = as.factor(KeyID))) + geom_density(position = "fill")  + xlim(minDate, maxDate))
-  #geom_point()
-```
-
-```{r}
-#| echo: false
-#| eval: false
-df <- output$Gypsy_Moth_Seasonality
-
-fig <- plot_ly(type = 'violin')
-for (i in 1:length(unique(df$KeyID))) {
-  fig <- add_trace(
-    fig,
-    x=df$Date[df$KeyID == i],
-    y=df$Pupae[df$KeyID == i],
-    hoveron = "points+Pupae",
-    side = 'negative',
-    scalemode = 'count',
-    color = I("blue")
-    
-  ) 
-}
-fig
-```
-
-```{r}
-#| echo: false
-#| eval: false
-df <- subset(output$Gypsy_Moth_Seasonality, KeyID == 1)
-
-df %>% plot_ly(
-    y = ~KeyID,
-    x = ~Pupae,
-    orientation = "h",
-    side = "positive",
-    type = 'violin')
-
-```
 
 ```{r}
 #| echo: false
@@ -112,165 +57,61 @@ gm <- as.data.frame(output$Gypsy_Moth_Seasonality)
 #today = "7-6-22"
 
 getDatesForLifestage <- function(lifestage){
-  # Adjust restype (SBW = fir and spruce, GM = GM)
-  restype = "GM"
-  
-  # Saving vector
-  vec_dates = "resource site minmax CI dates"
   
   resource = gm
   resource$Name <- resource$KeyID
   
-  # fir or spruce
   sites <- unique(resource$Name)
-  
-  
-  
-  # Subset each site
-  
-  for (m in 1: length(unique(resource$Name))){
+  tableFinal <- data.frame(min66 = character(), max66 = character(),
+                           min95 = character(), max95 = character(),
+                           min99 = character(), max99 = character())
+  for (m in 1:length(sites)){
+    site <- subset(resource, KeyID == sites[m])  
+    site$date <-paste(site$Year,"-", site$Month,"-", site$Day, sep ="") 
     
-    subsite <- subset(resource, Name == sites[m])
-    subsite <- subset(subsite, subsite[,lifestage] != 0)
-    subsite$date <-paste( subsite$Year,"-", subsite$Month,"-", subsite$Day, sep ="") 
-    
-    
-    
-    #### Build loop
-    
-    
-    dates_sampling <- vector(mode = "list", length = length(sites))
-    
-    for (l in 1: length(subsite[,lifestage]) ) {
-      subsite$sum [l] = sum(subsite[,lifestage][1:l])
-    }
-    
-    
-    min =c()
-    max=c()
-    for(i in 1:length(CI)){
-      min[i] = sum(subsite[,lifestage])*(((100-CI[i])/2)/100)
-      max[i] = sum(subsite[,lifestage])*((CI[i]+((100-CI[i])/2))/100) 
-      
-      
-      for (j in 1: length(subsite[,lifestage])){
-        if(subsite$sum[j] < min[i]){
-          j =j+1
-        }else{
-          # print(paste(restype," ",subsite$Name[j]," min date CI",CI[i],": ",subsite$date[j], sep= ""))
-          tempmin = paste(restype," ",subsite$Name[j]," min_date CI",CI[i]," ",subsite$date[j], sep= "")
-          vec_dates = c(vec_dates, tempmin)
-          break
-        }
-      } 
-      
-      for (k in 1: length(subsite[,lifestage])){
-        if(subsite$sum[k] <= max[i]){
-          k =k+1
-        }else{
-          #print(paste(restype," ",subsite$Name[k-1]," max date CI",CI[i],": ",subsite$date[k-1], sep= ""))
-          tempmax = paste(restype," ",subsite$Name[k-1]," max_date CI",CI[i]," ",subsite$date[k-1], sep= "")
-          vec_dates = c(vec_dates, tempmax)
-          break
-        }
+    if (lifestage == "Pupae"){
+      modelOutput <- site$Pupae
+    } else {
+      if (lifestage == "Adult"){
+        modelOutput <- site$Adult
+      } else {
+        modelOutput <- NULL
       }
     }
+    
+    min66 <- sum(modelOutput)*(((100-66)/2)/100)
+    max66 <- sum(modelOutput)*((66+((100-66)/2))/100) 
+    
+    min95 <- sum(modelOutput)*(((100-95)/2)/100)
+    max95 <- sum(modelOutput)*((95+((100-95)/2))/100) 
+    
+    min99 <- sum(modelOutput)*(((100-99)/2)/100)
+    max99 <- sum(modelOutput)*((99+((100-99)/2))/100) 
+    
+    site$sum <- cumsum(modelOutput)
+    startDate66 <- site[site$sum>=min66,][1,]$date
+    endDate66 <- tail(site[site$sum<=max66,], 1)$date
+    
+    startDate95 <- site[site$sum>=min95,][1,]$date
+    endDate95 <- tail(site[site$sum<=max95,], 1)$date
+    
+    startDate99 <- site[site$sum>=min99,][1,]$date
+    endDate99 <- tail(site[site$sum<=max99,], 1)$date
+    
+    siteFinal <- data.frame(min66 = startDate66, max66 = endDate66,
+                           min95 = startDate95, max95 = endDate95,
+                           min99 = startDate99, max99 = endDate99)
+    tableFinal <- rbind(tableFinal, siteFinal)
   }
-  tabledates = strsplit(vec_dates, split = " ")
-  tabledates = as.data.frame(Reduce(rbind, tabledates))
-  colnames(tabledates) = c("resource","site","minmax", "CI", "dates")
-  rownames(tabledates) = 1:nrow(tabledates)
-  write.csv(tabledates,paste("SpongyMoth_",lifestage,"_BioSIM_Summer_",year,"_dates_",today,".csv",sep=""))
-  
-  # Copy paste both outputs into a csv file (one after the other vertically) and add top line
-  
-  
-  ###########################
-  #                         #
-  #     GM final tables     #
-  #                         #
-  ###########################
-  
-  #Before loading data separate columns in excel
-  
-  data <- read.csv(paste("SpongyMoth_",lifestage,"_BioSIM_Summer_",year,"_dates_",today,".csv",sep=""))
-  data <- data[-1,-1]
-  resourcetype = "GM"
-  sites = unique(data$site)
-  
-  #Prepare output file
-  final <- vector(mode = "list", length = length(resourcetype))
-  
-  
-  
-  for(i in 1:length(resourcetype)){
-    resdata <- subset(data,resource == resourcetype[i])
-    
-    
-    #CI66
-    data66 <- subset(resdata, CI == "CI66")
-    min_data66 <- subset(data66, minmax == "min_date")
-    max_data66 <- subset(data66, minmax == "max_date")
-    
-    
-    matrix66 <- data.frame(matrix(0, ncol = 4, nrow = length(unique(data$site))))
-    colnames(matrix66) <- c("resource","site","min66","max66")
-    
-    for (j in 1: length(unique(data$site))){
-      matrix66[j,1] <- data66$resource[j]
-      matrix66[j,2] <- sites[j]
-      matrix66[j,3] <- min_data66$dates[j]
-      matrix66[j,4] <- max_data66$dates[j]
-    }
-    
-    #CI95
-    data95 <- subset(resdata, CI == "CI95")
-    min_data95 <- subset(data95, minmax == "min_date")
-    max_data95 <- subset(data95, minmax == "max_date")
-    
-    
-    matrix95 <- data.frame(matrix(0, ncol = 4, nrow = length(unique(data$site))))
-    colnames(matrix95) <- c("resource","site","min95","max95")
-    
-    for (k in 1: length(unique(data$site))){
-      matrix95[k,1] <- data95$resource[k]
-      matrix95[k,2] <- sites[k]
-      matrix95[k,3] <- min_data95$dates[k]
-      matrix95[k,4] <- max_data95$dates[k]
-    }
-    
-    #CI99
-    data99 <- subset(resdata, CI == "CI99")
-    min_data99 <- subset(data99, minmax == "min_date")
-    max_data99 <- subset(data99, minmax == "max_date")
-    
-    
-    matrix99 <- data.frame(matrix(0, ncol = 4, nrow = length(unique(data$site))))
-    colnames(matrix99) <- c("resource","site","min99","max99")
-    
-    for (l in 1: length(unique(data$site))){
-      matrix99[l,1] <- data99$resource[l]
-      matrix99[l,2] <- sites[l]
-      matrix99[l,3] <- min_data99$dates[l]
-      matrix99[l,4] <- max_data99$dates[l]
-    }
-    final[[i]] <- cbind(matrix66,matrix95,matrix99)
-  }
-  
-  
-  
-  
-  tablefinal <- data.frame(Reduce(rbind, final))
-  tablefinal$name <- locations$Name
-  tablefinal$latitude <- locations$Latitude
-  tablefinal$longitude <- locations$Longitude
-  tablefinal <- tablefinal[,c("site", "name", "latitude", "longitude", "min66","max66","min95","max95","min99","max99")]
-  
-  
+  tableFinal$site <- locations$KeyID
+  tableFinal$name <- locations$Name
+  tableFinal$latitude <- locations$Latitude
+  tableFinal$longitude <- locations$Longitude
+  tableFinal <- tableFinal[,c("site", "name", "latitude", "longitude", "min66","max66","min95","max95","min99","max99")]
   
   # save file
   #write.csv(tablefinal,paste("SpongyMoth_",lifestage,"_BioSIM_Summer_",year,"_Sampling_dates_",today,".csv",sep=""))
-  return(tablefinal)
+  return(tableFinal)
 }
 ```
 
