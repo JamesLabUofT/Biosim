@@ -1,19 +1,5 @@
 [
   {
-    "objectID": "RunSpongyMothSamplingDates.html#pupae-spongy-moths",
-    "href": "RunSpongyMothSamplingDates.html#pupae-spongy-moths",
-    "title": "SpongyMoth",
-    "section": "Pupae Spongy Moths",
-    "text": "Pupae Spongy Moths"
-  },
-  {
-    "objectID": "RunSpongyMothSamplingDates.html#adult-spongy-moths",
-    "href": "RunSpongyMothSamplingDates.html#adult-spongy-moths",
-    "title": "SpongyMoth",
-    "section": "Adult Spongy Moths",
-    "text": "Adult Spongy Moths"
-  },
-  {
     "objectID": "RunSBWPupaeSamplingDates.html#pupae-sbw",
     "href": "RunSBWPupaeSamplingDates.html#pupae-sbw",
     "title": "SBW",
@@ -40,5 +26,19 @@
     "title": "James Lab @ UofT’s Biosim simulations",
     "section": "",
     "text": "Spruce Budworm\nSpongy Moth"
+  },
+  {
+    "objectID": "RunSpongyMothSamplingDates.html#pupae-spongy-moths",
+    "href": "RunSpongyMothSamplingDates.html#pupae-spongy-moths",
+    "title": "SpongyMoth",
+    "section": "Pupae Spongy Moths",
+    "text": "Pupae Spongy Moths"
+  },
+  {
+    "objectID": "RunSpongyMothSamplingDates.html#adult-spongy-moths",
+    "href": "RunSpongyMothSamplingDates.html#adult-spongy-moths",
+    "title": "SpongyMoth",
+    "section": "Adult Spongy Moths",
+    "text": "Adult Spongy Moths"
   }
 ]
