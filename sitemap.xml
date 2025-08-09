@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://JamesLabUofT.github.io/Biosim/RunSBWPupaeSamplingDates.html</loc>
-    <lastmod>2025-08-08T05:51:49.115Z</lastmod>
-  </url>
-  <url>
     <loc>https://JamesLabUofT.github.io/Biosim/index.html</loc>
-    <lastmod>2025-08-08T05:51:49.194Z</lastmod>
+    <lastmod>2025-08-09T05:43:35.458Z</lastmod>
   </url>
   <url>
     <loc>https://JamesLabUofT.github.io/Biosim/RunSpongyMothSamplingDates.html</loc>
-    <lastmod>2025-08-08T05:51:49.115Z</lastmod>
+    <lastmod>2025-08-09T05:43:35.380Z</lastmod>
+  </url>
+  <url>
+    <loc>https://JamesLabUofT.github.io/Biosim/RunSBWPupaeSamplingDates.html</loc>
+    <lastmod>2025-08-09T05:43:35.380Z</lastmod>
   </url>
 </urlset>
